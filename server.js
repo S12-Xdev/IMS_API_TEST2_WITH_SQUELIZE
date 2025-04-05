@@ -39,7 +39,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// Example route
+// Route handlers
 app.get("/api/data", (req, res) => {
   res.json({ message: "Hello from the server!" });
 });
