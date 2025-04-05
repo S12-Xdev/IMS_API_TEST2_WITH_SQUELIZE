@@ -15,33 +15,15 @@ module.exports = (sequelize, DataTypes) => {
       });
       item.belongsTo(models.category, {
         foreignKey: "category_id",
-        as: "categories",
+        as: "category",
       });
     }
   }
   item.init(
     {
       item_name: DataTypes.STRING,
-      user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-          model: "user",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      },
-      category_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-          model: "category",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      }
+      user_id:  DataTypes.INTEGER,
+      category_id: DataTypes.INTEGER,
     },
     {
       sequelize,

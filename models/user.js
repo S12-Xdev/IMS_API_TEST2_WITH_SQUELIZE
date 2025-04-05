@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       user.hasMany(models.item, {
         foreignKey: "user_id",
-        as: "items",
+        as: "item",
       });
       user.belongsTo(models.previlege, {
-        foreignKey: "role",
-        as: "previleges",
+        foreignKey: "role_id",
+        as: "previlege",
       });
     }
   }
@@ -23,16 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       fname: DataTypes.STRING,
       lname: DataTypes.STRING,
-      role: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-          model: "previlege",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      },
+      role_id: DataTypes.INTEGER,
     },
     {
       sequelize,

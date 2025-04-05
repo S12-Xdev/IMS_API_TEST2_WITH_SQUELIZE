@@ -13,12 +13,12 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       previlege.hasMany(models.user, {
         foreignKey: "user_id",
-        as: "users",
+        as: "user",
       });
     }
   }
   previlege.init({
-    role: DataTypes.STRING,
+    role_name: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'previlege',

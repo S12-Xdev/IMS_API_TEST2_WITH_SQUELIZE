@@ -2,31 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("item", {
+    await queryInterface.createTable("user", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      item_name: {
+      fname: {
         type: Sequelize.STRING,
       },
-      user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: "user",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
+      lname: {
+        type: Sequelize.STRING,
       },
-      category_id: {
+      role_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
-          model: "catagory",
+          model: "previlege",
           key: "id",
         },
         onDelete: "CASCADE",
@@ -43,6 +36,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("item");
+    await queryInterface.dropTable("user");
   },
 };
