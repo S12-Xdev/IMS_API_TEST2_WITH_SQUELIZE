@@ -22,12 +22,13 @@ module.exports = (sequelize, DataTypes) => {
   item.init(
     {
       item_name: DataTypes.STRING,
-      user_id:  DataTypes.INTEGER,
+      user_id: DataTypes.INTEGER,
       category_id: DataTypes.INTEGER,
     },
     {
       sequelize,
       modelName: "item",
+      tableName: "item",
     }
   );
   return item;
