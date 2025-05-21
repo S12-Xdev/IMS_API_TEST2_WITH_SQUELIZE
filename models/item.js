@@ -9,21 +9,21 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      item.belongsTo(models.user, {
-        foreignKey: "user_id",
-        as: "users",
-      });
       item.belongsTo(models.category, {
         foreignKey: "category_id",
         as: "category",
+      });
+      item.hasMany(models.userItems, {
+        foreignKey: "item_id",
+        as: "assignedUsers",
       });
     }
   }
   item.init(
     {
       item_name: DataTypes.STRING,
-      user_id: DataTypes.INTEGER,
       category_id: DataTypes.INTEGER,
+      quantity: DataTypes.INTEGER,
     },
     {
       sequelize,
