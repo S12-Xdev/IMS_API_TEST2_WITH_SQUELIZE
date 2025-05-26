@@ -102,7 +102,7 @@ app.use(globalErrorHandler);
 
 const startServer = async () => {
   try {
-    await db.sequelize.sync(); // Use { alter: true } or migrations in production
+    await db.sequelize.sync({ alter: true}); // Use { alter: true } or migrations in production
     console.log("✅ Database connected successfully");
 
     app.listen(PORT, () => {

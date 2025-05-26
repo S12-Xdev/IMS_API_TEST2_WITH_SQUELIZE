@@ -20,8 +20,19 @@ module.exports = (sequelize, DataTypes) => {
   }
   user.init(
     {
-      fname: DataTypes.STRING,
-      lname: DataTypes.STRING,
+      fname: {
+        type: DataTypes.STRING,
+        allowNull: false, // or true if optional
+      },
+      lname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      phone: {
+        type: DataTypes.STRING,
+        allowNull: true, // or false if required
+        unique: true, // optional: enforce unique phone numbers
+      },
       role_id: DataTypes.INTEGER,
       email: {
         type: DataTypes.STRING,

@@ -1,13 +1,19 @@
 const express = require("express");
 const router = express.Router();
-
+const userController = require("../controllers/userController");
 const { userAuth } = require("../middlwares/userAuth");
-const { getItems, getItem } = require("../controllers/userController");
 
-// This code defines a user route for fetching items and item details.
+// Public routes
+router.post("/register", userController.register);
+router.post("/login", userController.login);
 
-router.get("/item/getItems", userAuth, getItems);
+// Protected routes
+router.get("/:id", userAuth, userController.getUser);
+router.put("/:id", userAuth, userController.updateUser);
+router.put("/:id/change-password", userAuth, userController.changePassword);
+router.delete("/:id", userAuth, userController.deleteUser);
 
-router.get("/item/getItem/:id", userAuth, getItem);
+// Admin/Clerk accessible route to get all users (you can protect this based on role inside the controller or middleware)
+router.get("/", userAuth, userController.getAllUsers);
 
 module.exports = router;

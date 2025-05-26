@@ -1,12 +1,12 @@
 const cookieParser = require("cookie-parser");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 
 dotenv.config();
 
 const { user } = require("../models");
-const { CustomErrorHandler } = require("../services/CustomErrorHandler");
+const { CustomErrorHandler } = require("../utils/customErrorHandler");
 
 exports.auth = async (req, res, next) => {
   const { Email, Password } = req.body;
@@ -37,7 +37,7 @@ exports.auth = async (req, res, next) => {
         role: userExist.role_id,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: process.env.JWT_EXPIRES_IN || "2m" }
     );
 
     res.cookie("token", token, {

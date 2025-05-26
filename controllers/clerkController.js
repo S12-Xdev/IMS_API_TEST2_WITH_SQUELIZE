@@ -1,49 +1,17 @@
-const { CustomErrorHandler } = require("../services/CustomErrorHandler");
-const { item, category, user, userItems } = require("../models");
+const clerkService = require("../services/clerkService");
+const { CustomErrorHandler } = require("../utils/customErrorHandler");
 
 exports.addItem = async (req, res, next) => {
-  const { itemName, catName, itemQuantity } = req.body;
-  const userData = req.user;
-
-  if (!userData || (userData.role !== "admin" && userData.role !== "clerk")) {
-    return next(
-      new CustomErrorHandler("You are not authorized to add items!", 403)
-    );
-  }
-
-  if (!itemName || !catName || itemQuantity == null || itemQuantity < 0) {
-    return next(
-      new CustomErrorHandler(
-        "Invalid input: itemName, catName, and itemQuantity are required.",
-        400
-      )
-    );
-  }
-
   try {
-    const cat = await category.findOne({ where: { catName } });
-    if (!cat) {
-      throw new CustomErrorHandler("Category not found", 404);
+    const userData = req.user;
+    if (!userData || (userData.role !== "admin" && userData.role !== "clerk")) {
+      return next(new CustomErrorHandler("Unauthorized", 403));
     }
 
-    const itemExist = await item.findOne({ where: { item_name: itemName } });
-    if (itemExist) {
-      throw new CustomErrorHandler(
-        "Item already registered. You can update the name or quantity.",
-        409
-      );
-    }
+    const { itemName, catName, itemQuantity } = req.body;
+    const newItem = await clerkService.addItem(itemName, catName, itemQuantity);
 
-    const newItem = await item.create({
-      item_name: itemName,
-      quantity: itemQuantity,
-      category_id: cat.id,
-    });
-
-    res.status(201).json({
-      message: "Item added successfully",
-      data: newItem,
-    });
+    res.status(201).json({ message: "Item added", data: newItem });
   } catch (error) {
     next(error);
   }
@@ -51,103 +19,55 @@ exports.addItem = async (req, res, next) => {
 
 exports.getItems = async (req, res, next) => {
   try {
-    const allItems = await item.findAll();
-    res.status(200).json({ Items: allItems });
+    const items = await clerkService.getAllItems();
+    res.status(200).json({ Items: items });
   } catch (error) {
-    next(new CustomErrorHandler("Failed to retrieve items", 500));
+    next(error);
   }
 };
 
 exports.getItem = async (req, res, next) => {
-  const userData = req.user;
-
-  if (!userData || (userData.role !== "admin" && userData.role !== "user")) {
-    return next(
-      new CustomErrorHandler("You are not authorized to view this item!", 403)
-    );
-  }
-
   try {
-    const Item = await item.findByPk(req.params.id);
-    if (!Item) {
-      throw new CustomErrorHandler("Item not found", 404);
+    const userData = req.user;
+    if (!userData || (userData.role !== "admin" && userData.role !== "user")) {
+      return next(new CustomErrorHandler("Unauthorized", 403));
     }
 
-    res.status(200).json({ Item });
+    const foundItem = await clerkService.getItemById(req.params.id);
+    res.status(200).json({ Item: foundItem });
   } catch (error) {
     next(error);
   }
 };
 
 exports.updateItem = async (req, res, next) => {
-  const { itemName, itemQuantity } = req.body;
-  const itemId = req.params.id;
-
-  if (!itemName || itemQuantity == null || itemQuantity < 0) {
-    return next(
-      new CustomErrorHandler(
-        "Invalid input: itemName and itemQuantity are required.",
-        400
-      )
-    );
-  }
-
   try {
-    const itemExist = await item.findByPk(itemId);
-    if (!itemExist) {
-      throw new CustomErrorHandler("Item not found", 404);
-    }
+    const { itemName, itemQuantity } = req.body;
+    const updatedItem = await clerkService.updateItem(
+      req.params.id,
+      itemName,
+      itemQuantity
+    );
 
-    await itemExist.update({
-      item_name: itemName,
-      quantity: itemQuantity,
-    });
-
-    res.status(200).json({
-      message: "Item updated successfully",
-      data: itemExist,
-    });
+    res.status(200).json({ message: "Item updated", data: updatedItem });
   } catch (error) {
     next(error);
   }
 };
 
 exports.assignItemToUser = async (req, res, next) => {
-  const { itemId, userId, quantity } = req.body;
-
-  if (!itemId || !userId || quantity == null || quantity <= 0) {
-    return next(
-      new CustomErrorHandler(
-        "Invalid input: itemId, userId, and quantity are required.",
-        400
-      )
-    );
-  }
-
   try {
-    const availableItem = await item.findByPk(itemId);
-    if (!availableItem) {
-      throw new CustomErrorHandler("Item not found!", 404);
-    }
-
-    if (availableItem.quantity < quantity) {
-      throw new CustomErrorHandler("Not enough quantity available!", 409);
-    }
-
-    const newUserItem = await userItems.create({
-      user_id: userId,
-      item_id: itemId,
-      quantity,
-    });
-
-    availableItem.quantity -= quantity;
-    await availableItem.save();
-
-    const userData = await user.findByPk(userId);
+    const { itemId, userId, quantity } = req.body;
+    const result = await clerkService.assignItemToUser(
+      itemId,
+      userId,
+      quantity
+    );
 
     res.status(201).json({
-      message: `Item assigned to ${userData.fname} ${userData.lname} successfully`,
-      data: newUserItem,
+      message: result.message,
+      assignedTo: `${result.user.fname} ${result.user.lname}`,
+      data: result.data,
     });
   } catch (error) {
     next(error);

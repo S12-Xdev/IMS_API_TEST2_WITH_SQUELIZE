@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { userAuth } = require("../middlwares/userAuth");
-const { CustomErrorHandler } = require("../services/CustomErrorHandler");
+const { CustomErrorHandler } = require("../utils/customErrorHandler");
 
 const { item, category, user, previlege } = require("../models");
 

@@ -1,66 +1,79 @@
-const { CustomErrorHandler } = require("../services/CustomErrorHandler");
-const { item, userItems } = require("../models");
+const { CustomErrorHandler } = require("../utils/customErrorHandler");
+const userService = require("../services/userService");
 
-exports.getItems = async (req, res, next) => {
+// Register a new user
+exports.register = async (req, res, next) => {
   try {
-    const allItems = await item.findAll();
-    res.status(200).json({ Items: allItems });
-  } catch (error) {
-    next(new CustomErrorHandler("Failed to retrieve items", 500));
+    const user = await userService.registerUser(req.body);
+    res.status(201).json({ message: "User registered successfully", user });
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 400));
   }
 };
 
-exports.getItem = async (req, res, next) => {
-  const userData = req.user;
-
-  if (!userData || (userData.role !== "admin" && userData.role !== "user")) {
-    return next(
-      new CustomErrorHandler("You are not authorized to view this item!", 403)
-    );
-  }
-
+// Login user
+exports.login = async (req, res, next) => {
   try {
-    const foundItem = await item.findByPk(req.params.id);
-
-    if (!foundItem) {
-      throw new CustomErrorHandler("Item not found", 404);
-    }
-
-    res.status(200).json({ Item: foundItem });
-  } catch (error) {
-    next(
-      error instanceof CustomErrorHandler
-        ? error
-        : new CustomErrorHandler("Error retrieving item", 500)
-    );
+    const { token, user } = await userService.loginUser(req.body);
+    res.status(200).json({ token, user });
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 401));
   }
 };
 
-exports.getUserItems = async (req, res, next) => {
-  const userData = req.user;
-
-  if (!userData || userData.role !== "user") {
-    return next(
-      new CustomErrorHandler("You are not authorized to view your items!", 403)
-    );
-  }
-
+// Get user by ID
+exports.getUser = async (req, res, next) => {
   try {
-    const userItemsList = await userItems.findAll({
-      where: { user_id: userData.id },
-      include: [{ model: item }],
-    });
+    const user = await userService.getUserById(req.params.id);
+    res.status(200).json(user);
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 404));
+  }
+};
 
-    if (userItemsList.length === 0) {
-      throw new CustomErrorHandler("No items assigned to this user.", 404);
-    }
+// Update user
+exports.updateUser = async (req, res, next) => {
+  try {
+    const updated = await userService.updateUser(req.params.id, req.body);
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updated });
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 400));
+  }
+};
 
-    res.status(200).json({ UserItems: userItemsList });
-  } catch (error) {
-    next(
-      error instanceof CustomErrorHandler
-        ? error
-        : new CustomErrorHandler("Failed to retrieve user items", 500)
+// Change password
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    await userService.changePassword(
+      req.params.id,
+      currentPassword,
+      newPassword
     );
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 400));
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res, next) => {
+  try {
+    await userService.deleteUser(req.params.id);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 404));
+  }
+};
+
+// Get all users (optionally with filter via query params)
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await userService.getAllUsers(req.query);
+    res.status(200).json(users);
+  } catch (err) {
+    return next(new CustomErrorHandler(err.message, 400));
   }
 };

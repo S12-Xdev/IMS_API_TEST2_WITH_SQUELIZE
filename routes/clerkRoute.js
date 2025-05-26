@@ -3,20 +3,26 @@ const router = express.Router();
 
 const { userAuth } = require("../middlwares/userAuth");
 const {
+  addItem,
   getItems,
   getItem,
   updateItem,
   assignItemToUser,
 } = require("../controllers/clerkController");
 
-router.post("/item/addItem", userAuth, addItem);
+// Add a new item
+router.post("/items", userAuth, addItem);
 
-router.get("/item/getItems", userAuth, getItems);
+// Get all items
+router.get("/items", userAuth, getItems);
 
-router.get("/item/getItem/:id", userAuth, getItem);
+// Get a specific item by ID
+router.get("/items/:id", userAuth, getItem);
 
-router.put("/api/item/updateItem/:id", userAuth, updateItem);
+// Update a specific item
+router.put("/items/:id", userAuth, updateItem);
 
-router.post("/api/admin/assignItemToUser", userAuth, assignItemToUser);
+// Assign an item to a user
+router.post("/items/assign", userAuth, assignItemToUser);
 
 module.exports = router;
